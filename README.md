@@ -114,11 +114,6 @@ Submitting a flag:
 $ ./htbfy.py machine submit someflag
 [+] Flag submitted successfully!
 ```
-Extending a machine's time:
-```
-$ ./htbfy.py machine extend
-FILL THIS UP WITH OUTPUT FROM THE TOOL, SO I CAN SHOWCASE THE TIME THAT THE MACHINE GOT UPDATED WITH
-```
 Listing all 20 active machines:
 ```
 $ ./htbfy.py machine list

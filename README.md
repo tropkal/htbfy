@@ -8,8 +8,8 @@ Also, I'm a hacker, not a professional programmer. My code could probably be cle
 # HTB app token
 This script uses **dotenv** to load the HTB app token in an environment variable called **HTB_APP_TOKEN**. You can get yours from your HTB profile/profile settings, create app token. It's only available for 1 year max, so be mindful of that. Put the app token in the .env file under the same directory as this script.  
 ```
-$ ls
-README.md  argparser.py  htbclient.py  htbfy.py  requirements.txt
+$ ls -a
+.  ..  .env  .git  .gitignore  README.md  requirements.txt
 $ cat .env
 HTB_APP_TOKEN=your_app_token_here
 ```

@@ -3,13 +3,13 @@
 
 # Why ?
 Because I hate leaving my terminal. The terminal is love, the terminal is life. Amen. Accept it. Embrace it. Thank me later.  
-Also, I'm a hacker, not a professional programmer. My code could probably be more efficient and cleaner, whatever, if it works, it works.
+Also, I'm a hacker, not a professional programmer. My code could probably be cleaner and more efficient, whatever, if it works, it works.
 
 # HTB app token
 This script uses **dotenv** to load the HTB app token in an environment variable called **HTB_APP_TOKEN**. You can get yours from your HTB profile/profile settings, create app token. It's only available for 1 year max, so be mindful of that. Put the app token in the .env file under the same directory as this script.  
 ```
 $ ls
-.env htbfy.py
+README.md  argparser.py  htbclient.py  htbfy.py  requirements.txt
 $ cat .env
 HTB_APP_TOKEN=your_app_token_here
 ```
@@ -32,7 +32,7 @@ $ . venv/bin/activate
 $ uv pip install -r requirements.txt
 ```
 # Usage
-This script is by no means complete when it comes to the HTB API, but it can do some basic things (at least for now), like spawning, terminating, resetting, extending a machine's time. It can also fetch: the current seasonal rank, a list of the active machines, the current active machine and the time left on it, the connection status of the VPN, and it can also search for any machine and retrieve some information on it like its OS, difficulty, etc.
+This script is by no means complete when it comes to the HTB API, but it can do some basic things (at least for now), like spawning, terminating, resetting, extending a machine's time, submitting a flag. It can also fetch: the current seasonal rank, a list of the active machines, the current active machine and the time left on it, the connection status of the VPN, and it can also search for any machine and retrieve some information on it like its OS, difficulty, or search for a particular user.
 
 I'll maybe add functionality later regarding challenges, fortresses and/or whatever else. Maybe. For now, this works for me.
 ```
@@ -52,16 +52,17 @@ options:
 ## User API
 ```
 $ ./htbfy.py user -h
-usage: htbfy.py user [-h] {info,status,rank} ...
+usage: htbfy.py user [-h] {info,status,rank,search} ...
 
 positional arguments:
-{info,status,rank}
-info              Get user information.
-status            Get connection status.
-rank              Get seasonal rank.
+{info,status,rank,search}
+info                Get user information.
+status              Get connection status.
+rank                Get seasonal rank.
+search              Search for a particular user.
 
 options:
--h, --help          show this help message and exit
+-h, --help            show this help message and exit
 ```
 ## Machine API
 ```

@@ -1,6 +1,5 @@
 import argparse
 import json
-from mimetypes import inited
 import os
 import requests
 import sys

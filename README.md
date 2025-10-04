@@ -32,7 +32,7 @@ $ . venv/bin/activate
 $ uv pip install -r requirements.txt
 ```
 # Usage
-This script is by no means complete when it comes to the HTB API, but it can do some basic things (at least for now), like spawning, terminating, resetting, extending a machine's time, submitting a flag and rating a flag's difficulty. It can also fetch: the current seasonal rank, a list of the active machines and can also filter the list by difficulty or OS, the current active machine and the time left on it, the connection status of the VPN, and it can also search for any machine and retrieve some information on it like its OS, difficulty, or search for a particular user.
+This script is by no means complete when it comes to the HTB API, but it can do some basic things (at least for now), like spawning, terminating, resetting, extending a machine's time, submitting a flag and rating a flag's difficulty. It can also fetch: the current seasonal rank, a list of the active machines and can also filter the list by difficulty or OS, the currently active machine and the time left on it, the connection status of the VPN, and it can also search for any machine and retrieve some information on it like its OS, difficulty, or search for a particular user.
 
 I'll maybe add functionality later regarding challenges, fortresses and/or whatever else. Maybe. For now, this works for me.
 ```

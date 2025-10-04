@@ -38,9 +38,24 @@ def create_parser(htb_client: HTBClient) -> argparse.ArgumentParser:
     active_machine.set_defaults(func=lambda _: htb_client.get_active_machine())
 
     active_machines = machine_subcommand.add_parser(
-        "list", help="Get a list of the currently active machines."
+        "list",
+        help="Get a list of the currently active machines (-diff to filter by a particular difficulty).",
     )
-    active_machines.set_defaults(func=lambda _: htb_client.get_active_machines())
+    active_machines.add_argument(
+        "-diff",
+        required=False,
+        default="",
+        help="Difficulty to filter the list of active machines by.",
+    )
+    active_machines.add_argument(
+        "-os",
+        required=False,
+        default="",
+        help="OS to filter the list of active machines by.",
+    )
+    active_machines.set_defaults(
+        func=lambda args: htb_client.get_active_machines(diff=args.diff, os=args.os)
+    )
 
     spawn_machine = machine_subcommand.add_parser("spawn", help="Spawn a machine.")
     spawn_machine.add_argument("name", help="Name of the machine to spawn.")
@@ -70,5 +85,15 @@ def create_parser(htb_client: HTBClient) -> argparse.ArgumentParser:
     )
     search_machine.add_argument("name", help="Name of the machine.")
     search_machine.set_defaults(func=htb_client.search_machine)
+
+    rate_machine = machine_subcommand.add_parser(
+        "rate", help="Submit a difficulty rating for an owned flag."
+    )
+    rate_machine.add_argument(
+        "owned",
+        help="Submit a difficulty rating for an owned flag for the currently active machine, i.e. user | root.",
+    )
+    rate_machine.add_argument("rating", help="Rating to submit, between 1 and 10.")
+    rate_machine.set_defaults(func=htb_client.rate_flag)
 
     return parser

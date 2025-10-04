@@ -32,7 +32,7 @@ $ . venv/bin/activate
 $ uv pip install -r requirements.txt
 ```
 # Usage
-This script is by no means complete when it comes to the HTB API, but it can do some basic things (at least for now), like spawning, terminating, resetting, extending a machine's time, submitting a flag. It can also fetch: the current seasonal rank, a list of the active machines, the current active machine and the time left on it, the connection status of the VPN, and it can also search for any machine and retrieve some information on it like its OS, difficulty, or search for a particular user.
+This script is by no means complete when it comes to the HTB API, but it can do some basic things (at least for now), like spawning, terminating, resetting, extending a machine's time, submitting a flag and rating a flag's difficulty. It can also fetch: the current seasonal rank, a list of the active machines and can also filter the list by difficulty or OS, the current active machine and the time left on it, the connection status of the VPN, and it can also search for any machine and retrieve some information on it like its OS, difficulty, or search for a particular user.
 
 I'll maybe add functionality later regarding challenges, fortresses and/or whatever else. Maybe. For now, this works for me.
 ```
@@ -67,18 +67,19 @@ options:
 ## Machine API
 ```
 $ ./htbfy.py machine -h
-usage: htbfy.py machine [-h] {active,list,spawn,terminate,reset,extend,submit,search} ...
+usage: htbfy.py machine [-h] {active,list,spawn,terminate,reset,extend,submit,search,rate} ...
 
 positional arguments:
-{active,list,spawn,terminate,reset,extend,submit,search}
+{active,list,spawn,terminate,reset,extend,submit,search,rate}
 active              Get the currently active machine.
-list                Get a list of the currently active machines.
+list                Get a list of the currently active machines (-diff to filter by a particular difficulty).
 spawn               Spawn a machine.
 terminate           Terminate the currently active machine.
 reset               Reset the currently active machine.
 extend              Extend the currently active machine's time.
 submit              Submit a flag.
 search              Search for a particular machine.
+rate                Submit a difficulty rating for an owned flag.
 
 options:
 -h, --help            show this help message and exit
@@ -87,7 +88,7 @@ options:
 Spawning a machine:
 ```
 $ ./htbfy.py machine spawn darkcorp
-[+] Machine DarkCorp is spawning.
+[+] Machine DarkCorp is spawning.: Success!
 [+] Machine spawned successfully, its IP is: 10.129.232.7. Took 102.73 seconds.
 ```
 Listing the currently active machine:
@@ -109,10 +110,21 @@ Terminating a machine:
 $ ./htbfy.py machine terminate
 [+] Machine terminated successfully.
 ```
+Rating a flag's difficulty:
+```
+$ ./htbfy.py machine rate user 10
+[+] User flag rated successfully as 'Brainfuck' (10) for Expressway.
+```
 Submitting a flag:
 ```
 $ ./htbfy.py machine submit someflag
 [+] Flag submitted successfully!
+```
+Extending a machine's time:
+```
+$ ./htbfy.py machine extend
+[+] Machine time extended successfully.
+[*] Expires at: 2025-10-04 20:46:12+00:00 UTC, time left before extending: 03h:09m:43s, 8:00:00 more hours added to the clock, total time remaining: 11h:09m:43s.
 ```
 Listing all 20 active machines:
 ```
@@ -143,6 +155,44 @@ $ ./htbfy.py machine list
 | 20 |  DarkCorp   | Windows | Insane | 2025-02-08 |  4.8   |  False  |    0    |   50   |  False  |   1544    |   1529    | True  | False |
 +----+-------------+---------+--------+------------+--------+---------+---------+--------+---------+-----------+-----------+-------+-------+
 ```
+Filter the list of active machines by OS or difficulty:
+```
+$ ./htbfy.py machine list -h
+usage: htbfy.py machine list [-h] [-diff DIFF] [-os OS]
+
+options:
+-h, --help  show this help message and exit
+-diff DIFF  Difficulty to filter the list of active machines by.
+-os OS      OS to filter the list of active machines by.
+
+$ ./htbfy.py machine list -diff easy
+[*] Filtering by 'Easy' difficulty.
+[+] Fetching the list of active machines...: Success!
++----+-------------+-------+-------+------------+--------+---------+---------+--------+---------+-----------+-----------+------+------+
+| ID |    Name     |  OS   | Diff. |  Released  | Rating | Running | Players | Points | Retired | User owns | Root owns | User | Root |
++----+-------------+-------+-------+------------+--------+---------+---------+--------+---------+-----------+-----------+------+------+
+| 1  | Expressway  | Linux | Easy  | 2025-09-20 |  3.8   |  False  |    0    |   20   |  False  |   7809    |   7524    | True | True |
+| 2  |  Soulmate   | Linux | Easy  | 2025-09-06 |  3.2   |  False  |    0    |   20   |  False  |   4162    |   4022    | True | True |
+| 3  | CodePartTwo | Linux | Easy  | 2025-08-16 |  4.4   |  False  |    0    |   20   |  False  |   6567    |   6100    | True | True |
+| 4  |   Editor    | Linux | Easy  | 2025-08-02 |  4.2   |  False  |    0    |   20   |  False  |   8826    |   8108    | True | True |
+| 5  |  Outbound   | Linux | Easy  | 2025-07-12 |  3.7   |  False  |    0    |   20   |  False  |   7640    |   6918    | True | True |
+| 6  | Artificial  | Linux | Easy  | 2025-06-21 |  4.2   |  False  |    0    |   20   |  False  |   8593    |   6985    | True | True |
++----+-------------+-------+-------+------------+--------+---------+---------+--------+---------+-----------+-----------+------+------+
+
+$ ./htbfy.py machine list -os windows
+[*] Filtering by OS.
+[+] Fetching the list of active machines...: Success!
++----+-------------+---------+--------+------------+--------+---------+---------+--------+---------+-----------+-----------+------+------+
+| ID |    Name     |   OS    | Diff.  |  Released  | Rating | Running | Players | Points | Retired | User owns | Root owns | User | Root |
++----+-------------+---------+--------+------------+--------+---------+---------+--------+---------+-----------+-----------+------+------+
+| 1  |   Mirage    | Windows |  Hard  | 2025-07-19 |  4.2   |  False  |    0    |   40   |  False  |   2126    |   1761    | True | True |
+| 2  |   Voleur    | Windows | Medium | 2025-07-05 |  4.8   |  False  |    0    |   30   |  False  |   3654    |   3136    | True | True |
+| 3  |  RustyKey   | Windows |  Hard  | 2025-06-28 |  4.3   |  False  |    0    |   40   |  False  |   2260    |   1815    | True | True |
+| 4  | TombWatcher | Windows | Medium | 2025-06-07 |  4.6   |  False  |    0    |   30   |  False  |   4987    |   4143    | True | True |
+| 5  | Certificate | Windows |  Hard  | 2025-05-31 |   4    |  False  |    0    |   40   |  False  |   2830    |   2701    | True | True |
+| 6  |  DarkCorp   | Windows | Insane | 2025-02-08 |  4.8   |  False  |    0    |   50   |  False  |   1568    |   1557    | True | True |
++----+-------------+---------+--------+------------+--------+---------+---------+--------+---------+-----------+-----------+------+------+
+```
 Fetching the VPN status:
 ```
 $ ./htbfy.py user status
@@ -155,11 +205,15 @@ $ ./htbfy.py user rank
 
 Seasonal rank info:
 -------------------
-League: None
-Rank: None
-Next_rank: {'id': 1, 'title': 'Bronze', 'requirement': 0}
-Total_ranks: None
-Rank_suffix: None
-Total_season_points: 0
-Flags_to_next_rank: {'obtained': 0, 'total': 1}
+League: Bronze
+Rank: 3349
+Next_rank: {'id': 2, 'title': 'Silver', 'requirement': 15}
+Total_ranks: 6877
+Rank_suffix: th
+Total_season_points: 65
+Flags_to_next_rank: {'obtained': 2, 'total': 4}
+User_owns: 1
+User_bloods: 0
+Root_owns: 1
+Root_bloods: 0
 ```

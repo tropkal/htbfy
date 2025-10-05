@@ -11,14 +11,14 @@ from tabulate import tabulate
 from typing import Optional
 
 JSON = (
-    str
-    | int
-    | float
-    | bool
-    | None
-    | dict[str, "JSON"]  # nested objects
-    | list["JSON"]  # arrays
-)
+        str
+        | int
+        | float
+        | bool
+        | None
+        | dict[str, "JSON"]  # nested objects
+        | list["JSON"]  # arrays
+        )
 
 
 class HTBClient:
@@ -30,9 +30,9 @@ class HTBClient:
 
     def _build_headers(self) -> dict[str, str]:
         headers = {
-            "Authorization": f"Bearer {self.app_token}",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/120.0",
-        }
+                "Authorization": f"Bearer {self.app_token}",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/120.0",
+                }
 
         return headers
 
@@ -63,8 +63,8 @@ class HTBClient:
             log.failure("Could not fetch the seasonal rank information.")
 
     def get_user_info(
-        self,
-    ) -> None:
+            self,
+            ) -> None:
         url = f"{self.base_url}/user/info"
         response = self.session.get(url, headers=self._build_headers())
         if response.status_code == 200:
@@ -94,14 +94,14 @@ class HTBClient:
             return None
 
     def _convert_time_to_utc(
-        self,
-        info_obj: JSON,
-        machine_os: str = "",
-    ) -> None:
+            self,
+            info_obj: JSON,
+            machine_os: str = "",
+            ) -> None:
         date_format = "%Y-%m-%d %H:%M:%S"
         initial_expires_at = datetime.strptime(
-            info_obj["expires_at"], date_format
-        ).replace(tzinfo=timezone.utc)
+                info_obj["expires_at"], date_format
+                ).replace(tzinfo=timezone.utc)
 
         time_now_utc = datetime.now(timezone.utc)
         time_left = initial_expires_at - time_now_utc
@@ -112,10 +112,6 @@ class HTBClient:
         seconds = seconds % 60
         formatted_time = "{:02}h:{:02}m:{:02}s".format(hours, minutes, seconds)
 
-        if not self.check_time:
-            log.info(
-                f"➔  Currently active machine: {info_obj['name']}, OS: {machine_os}, IP: {info_obj['ip']}, time left: {formatted_time}."
-            )
         if self.check_time:
             # get the new expires_at time after extending the box's time
             info_obj = self._get_active_machine()
@@ -124,17 +120,17 @@ class HTBClient:
                 sys.exit(-1)
 
             new_expires_at = datetime.strptime(
-                info_obj["expires_at"], date_format
-            ).replace(tzinfo=timezone.utc)
+                    info_obj["expires_at"], date_format
+                    ).replace(tzinfo=timezone.utc)
 
             time_added = new_expires_at - initial_expires_at
             log.info(
-                f"Expires at: {new_expires_at} UTC, time left before extending: {formatted_time}, {time_added} more hours added to the clock, total time remaining: {time_added + time_left}"
-            )
+                    f"Expires at: {new_expires_at} UTC, time left before extending: {formatted_time}, {time_added} more hours added to the clock, total time remaining: {time_added + time_left}"
+                    )
         else:
             log.info(
-                f"Expires at: {initial_expires_at} UTC, time left: {formatted_time}."
-            )
+                    f"Currently active machine: {info_obj['name']}, OS: {machine_os}, IP: {info_obj['ip']}, time left: {formatted_time}."
+                    )
 
     def get_active_machine(self) -> None:
         # NOT IN THE MOOD TO REMOVE THIS ONE OR THE OTHER ONE
@@ -154,65 +150,65 @@ class HTBClient:
             log.failure("Failed to fetch the active machine.")
 
     def _pretty_print(
-        self, machine_profile_list: list[JSON], p: Optional[Progress] = None
-    ) -> None:
+            self, machine_profile_list: list[JSON], p: Optional[Progress] = None
+            ) -> None:
         if p is not None:
             p.status("Please wait...")
 
         # building the table entries, i.e. each machine's profile
         rows = [
-            [
-                idx,
-                machine_profile.get("name"),  # name
-                machine_profile.get("os"),  # os
-                machine_profile.get("difficultyText"),  # difficulty
-                datetime.strptime(
-                    machine_profile.get("release").split("T")[0],
-                    "%Y-%m-%d",
-                ).date(),  # date
-                machine_profile.get("stars"),  # rating
-                machine_profile.get("playInfo", {}).get("isActive"),  # running
-                machine_profile.get("playInfo", {}).get(
-                    "active_player_count"
-                ),  # active player count
-                machine_profile.get(
-                    "points"
-                ),  # what's the diff between this and static_points ?
-                machine_profile.get("retired"),  # retired
-                machine_profile.get("user_owns_count"),  # total user owns
-                machine_profile.get("root_owns_count"),  # total root owns
-                machine_profile.get("authUserInUserOwns"),  # owned user
-                machine_profile.get("authUserInRootOwns"),  # owned root
-            ]
-            for idx, machine_profile in enumerate(machine_profile_list, 1)
-        ]
+                [
+                    idx,
+                    machine_profile.get("name"),  # name
+                    machine_profile.get("os"),  # os
+                    machine_profile.get("difficultyText"),  # difficulty
+                    datetime.strptime(
+                        machine_profile.get("release").split("T")[0],
+                        "%Y-%m-%d",
+                        ).date(),  # date
+                    machine_profile.get("stars"),  # rating
+                    machine_profile.get("playInfo", {}).get("isActive"),  # running
+                    machine_profile.get("playInfo", {}).get(
+                        "active_player_count"
+                        ),  # active player count
+                    machine_profile.get(
+                        "points"
+                        ),  # what's the diff between this and static_points ?
+                    machine_profile.get("retired"),  # retired
+                    machine_profile.get("user_owns_count"),  # total user owns
+                    machine_profile.get("root_owns_count"),  # total root owns
+                    machine_profile.get("authUserInUserOwns"),  # owned user
+                    machine_profile.get("authUserInRootOwns"),  # owned root
+                    ]
+                for idx, machine_profile in enumerate(machine_profile_list, 1)
+                ]
 
         if p is not None:
             p.success("Success!")
 
         # populating the table
         print(
-            tabulate(
-                rows,
-                headers=[
-                    "ID",
-                    "Name",
-                    "OS",
-                    "Diff.",
-                    "Released",
-                    "Rating",
-                    "Running",
-                    "Players",
-                    "Points",
-                    "Retired",
-                    "User owns",
-                    "Root owns",
-                    "User",
-                    "Root",
-                ],
-                tablefmt="pretty",
-            )
-        )
+                tabulate(
+                    rows,
+                    headers=[
+                        "ID",
+                        "Name",
+                        "OS",
+                        "Diff.",
+                        "Released",
+                        "Rating",
+                        "Running",
+                        "Players",
+                        "Points",
+                        "Retired",
+                        "User owns",
+                        "Root owns",
+                        "User",
+                        "Root",
+                        ],
+                    tablefmt="pretty",
+                    )
+                )
         print()
 
     def get_active_machines(self, diff, os) -> None:
@@ -316,8 +312,8 @@ class HTBClient:
             p = log.progress(f"Machine {machine_name} is spawning.")
         elif response.status_code == 403:
             log.warning(
-                f"Machine {machine_name} is spawning or already active. Terminate that machine first and then spawn another."
-            )
+                    f"Machine {machine_name} is spawning or already active. Terminate that machine first and then spawn another."
+                    )
             sys.exit(-1)
         else:
             log.failure(f"Could not spawn machine {machine_name}.")
@@ -332,12 +328,12 @@ class HTBClient:
             spawn_time = time_end - time_start
             p.success()
             log.success(
-                f"Machine spawned successfully, its IP is: {machine_ip}. Took {spawn_time:.2f} seconds."
-            )
+                    f"Machine spawned successfully, its IP is: {machine_ip}. Took {spawn_time:.2f} seconds."
+                    )
         else:
             log.failure(
-                f"Could not query the spawn status of the machine {machine_name}."
-            )
+                    f"Could not query the spawn status of the machine {machine_name}."
+                    )
             sys.exit(-1)
 
     def reset_machine(self) -> None:
@@ -364,8 +360,8 @@ class HTBClient:
         except Exception as e:
             # print(e)
             log.warning(
-                f"Some unexpected error occurred while resetting the machine {machine_name}."
-            )
+                    f"Some unexpected error occurred while resetting the machine {machine_name}."
+                    )
             sys.exit(-1)
 
         p.status("Please wait...")
@@ -393,15 +389,15 @@ class HTBClient:
                 log.success("Machine time extended successfully.")
 
                 self._convert_time_to_utc(
-                    info_obj,
-                )
+                        info_obj,
+                        )
         else:
             log.failure(
-                "Failed to extend the machine's time, it has plenty until expiration."
-            )
+                    "Failed to extend the machine's time, it has plenty until expiration."
+                    )
             log.info(
-                f"You could run './{os.path.basename(__file__)} machine active' to check the actual time until expiration."
-            )
+                    f"You could run './{os.path.basename(__file__)} machine active' to check the actual time until expiration."
+                    )
 
     def submit_flag(self, flag_obj: argparse.Namespace) -> None:
         url = f"{self.base_url}/machine/own"
@@ -419,15 +415,15 @@ class HTBClient:
 
         response = self.session.post(url, json=data, headers=self._build_headers())
         if (
-            response.status_code == 200
-            and response.json()["success"] == True
-            and "You pwned the " in response.json()["message"]
-        ):
+                response.status_code == 200
+                and response.json()["success"] == True
+                and "You pwned the " in response.json()["message"]
+                ):
             log.success("Flag submitted successfully!")
         elif (
-            response.status_code == 400
-            and response.json()["message"] == "Incorrect Flag."
-        ):
+                response.status_code == 400
+                and response.json()["message"] == "Incorrect Flag."
+                ):
             log.failure("Already submitted this flag or it's incorrect.")
         else:
             log.failure("Something bad happened when submitting the flag.")
@@ -438,24 +434,24 @@ class HTBClient:
         if response.status_code == 200:  # there already exists a rating
             if owned == "user":
                 if (
-                    response.json()["data"][0]["completed"] == True
-                    and response.json()["data"][0]["flag_rating"] is not None
-                ):
+                        response.json()["data"][0]["completed"] == True
+                        and response.json()["data"][0]["flag_rating"] is not None
+                        ):
                     existing_rating = int(
-                        response.json()["data"][0]["flag_rating"]
-                    )  # user rating
+                            response.json()["data"][0]["flag_rating"]
+                            )  # user rating
                     return existing_rating, True
                 else:
                     return None, False
 
             elif owned == "root":
                 if (
-                    response.json()["data"][1]["completed"] == True
-                    and response.json()["data"][1]["flag_rating"] is not None
-                ):
+                        response.json()["data"][1]["completed"] == True
+                        and response.json()["data"][1]["flag_rating"] is not None
+                        ):
                     existing_rating = int(
-                        response.json()["data"][1]["flag_rating"]
-                    )  # root rating
+                            response.json()["data"][1]["flag_rating"]
+                            )  # root rating
                     return existing_rating, True
                 else:
                     return None, False
@@ -465,16 +461,16 @@ class HTBClient:
 
     def rate_flag(self, rating_namespace: argparse.Namespace) -> None:
         rating_choices = {
-            2: "very easy",
-            3: "easy",
-            4: "not too easy",
-            5: "medium",
-            6: "a bit hard",
-            7: "hard",
-            8: "too hard",
-            9: "extremely hard",
-            10: "brainfuck",
-        }
+                2: "very easy",
+                3: "easy",
+                4: "not too easy",
+                5: "medium",
+                6: "a bit hard",
+                7: "hard",
+                8: "too hard",
+                9: "extremely hard",
+                10: "brainfuck",
+                }
 
         owned = str(rating_namespace.owned)
         rate = rating_namespace.rating
@@ -505,8 +501,8 @@ class HTBClient:
         existing_rating, completed = self._discover(machine_id, owned)
         if completed and isinstance(existing_rating, int):
             log.info(
-                f"{owned.capitalize()} flag has already been rated as '{rating_choices[existing_rating].capitalize()}' ({existing_rating}) for {machine_name}."
-            )
+                    f"{owned.capitalize()} flag has already been rated as '{rating_choices[existing_rating].capitalize()}' ({existing_rating}) for {machine_name}."
+                    )
             sys.exit(-1)
 
         if not completed:
@@ -514,12 +510,12 @@ class HTBClient:
             data = {"difficulty": rate, "machineId": machine_id, "type": owned}
             response = self.session.post(url, json=data, headers=self._build_headers())
             if (
-                response.status_code == 200
-                and response.json()["message"] == "Flag rated."
-            ):
+                    response.status_code == 200
+                    and response.json()["message"] == "Flag rated."
+                    ):
                 log.success(
-                    f"{owned.capitalize()} flag rated successfully as '{rating_choices[rate].capitalize()}' ({rate}) for {machine_name}."
-                )
+                        f"{owned.capitalize()} flag rated successfully as '{rating_choices[rate].capitalize()}' ({rate}) for {machine_name}."
+                        )
         else:
             log.failure("Can't submit a rating for a flag that was not found yet.")
             sys.exit(-1)

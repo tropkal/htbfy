@@ -124,6 +124,7 @@ class HTBClient:
                     ).replace(tzinfo=timezone.utc)
 
             time_added = new_expires_at - initial_expires_at
+            new_expires_at = new_expires_at.strftime("%Y-%m-%d %H:%M:%S") # change the format
             log.info(
                     f"Expires at: {new_expires_at} UTC, time left before extending: {formatted_time}, {time_added} more hours added to the clock, total time remaining: {time_added + time_left}"
                     )
@@ -139,10 +140,10 @@ class HTBClient:
         if response.status_code == 200:
             info_obj = response.json()["info"]
             if info_obj is not None:
-                # convert local time to UTC
                 machine_name = info_obj["name"]
                 machine_profile = self._get_machine_profile(machine_name)["info"]
                 machine_os = machine_profile["os"]
+                # convert local time to UTC
                 self._convert_time_to_utc(info_obj, machine_os)
             else:
                 log.info("No active machine found.")

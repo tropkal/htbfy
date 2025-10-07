@@ -476,6 +476,12 @@ class HTBClient:
         owned = str(rating_namespace.owned)
         rate = rating_namespace.rating
 
+        if owned not in ("user", "root"):
+            log.failure(
+                    "Can only submit flag difficulty ratings for user or root."
+                    )
+            sys.exit(-1)
+
         try:
             rate = int(rate)
         except ValueError:
@@ -506,7 +512,7 @@ class HTBClient:
                     )
             sys.exit(-1)
 
-        if not completed:
+        if completed and not existing_rating:
             url = f"{self.base_url}/machine/{machine_id}/flag/rate"
             data = {"difficulty": rate, "machineId": machine_id, "type": owned}
             response = self.session.post(url, json=data, headers=self._build_headers())

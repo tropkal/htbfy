@@ -442,6 +442,11 @@ class HTBClient:
                             response.json()["data"][0]["flag_rating"]
                             )  # user rating
                     return existing_rating, True
+                elif (
+                        response.json()["data"][1]["completed"] == True
+                        and response.json()["data"][1]["flag_rating"] is None
+                        ):
+                    return None, True
                 else:
                     return None, False
 
@@ -454,6 +459,11 @@ class HTBClient:
                             response.json()["data"][1]["flag_rating"]
                             )  # root rating
                     return existing_rating, True
+                elif (
+                        response.json()["data"][1]["completed"] == True
+                        and response.json()["data"][1]["flag_rating"] is None
+                        ):
+                    return None, True
                 else:
                     return None, False
         else:

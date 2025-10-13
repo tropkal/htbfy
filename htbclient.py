@@ -93,6 +93,17 @@ class HTBClient:
             log.failure("Failed to fetch the active machine.")
             return None
 
+    def _format_time(self, date_obj: datetime) -> str:
+
+        # date.days
+        # AttributeError: 'str' object has no attribute 'days'
+        days, seconds = date_obj.days, date_obj.seconds
+        hours = days * 24 + seconds // 3600
+        minutes = seconds % 3600 // 60
+        seconds = seconds % 60
+
+        return "{:02}h:{:02}m:{:02}s".format(hours, minutes, seconds)
+
     def _convert_time_to_utc(
             self,
             info_obj: JSON,
@@ -106,11 +117,9 @@ class HTBClient:
         time_now_utc = datetime.now(timezone.utc)
         time_left = initial_expires_at - time_now_utc
 
-        days, seconds = time_left.days, time_left.seconds
-        hours = days * 24 + seconds // 3600
-        minutes = seconds % 3600 // 60
-        seconds = seconds % 60
-        formatted_time = "{:02}h:{:02}m:{:02}s".format(hours, minutes, seconds)
+        # WHATS time_left ??
+        breakpoint()
+        formatted_time_left = self._format_time(time_left)
 
         if self.check_time:
             # get the new expires_at time after extending the box's time
@@ -125,12 +134,16 @@ class HTBClient:
 
             time_added = new_expires_at - initial_expires_at
             new_expires_at = new_expires_at.strftime("%Y-%m-%d %H:%M:%S") # change the format
+            time_added_formatted = self._format_time(time_added)
+            time_remaining = time_added_formatted + formatted_time_left
+            formatted_time_remaining = self._format_time(time_remaining)
+
             log.info(
-                    f"Expires at: {new_expires_at} UTC, time left before extending: {formatted_time}, {time_added} more hours added to the clock, total time remaining: {time_added + time_left}"
+                    f"Expires at: {new_expires_at} UTC, time left before extending: {formatted_time}, {time_added} more hours added to the clock, total time remaining: {formatted_time_remaining}"
                     )
         else:
             log.info(
-                    f"Currently active machine: {info_obj['name']}, OS: {machine_os}, IP: {info_obj['ip']}, time left: {formatted_time}."
+                    f"Currently active machine: {info_obj['name']}, OS: {machine_os}, IP: {info_obj['ip']}, time left: {formatted_time_left}."
                     )
 
     def get_active_machine(self) -> None:
@@ -263,6 +276,9 @@ class HTBClient:
             return response.json()
         elif response.status_code == 429:
             return
+        elif response.status_code == 404 and response.json()["message"] == "Machine not found":
+            log.failure("There's no machine with that name.")
+            sys.exit(-1)
         else:
             log.failure("Could not fetch the machine's profile.")
 
@@ -302,10 +318,12 @@ class HTBClient:
     def spawn_machine(self, machine_name_obj) -> None:
         url = f"{self.base_url}/vm/spawn"
         machine_name = machine_name_obj.name
+        if machine_name[0].isdigit():
+            log.failure("The name of the box must be a string.")
+            sys.exit(-1)
         machine_profile_json = self._get_machine_profile(machine_name)
-        machine_name = machine_profile_json["info"]["name"]
         machine_id = machine_profile_json["info"]["id"]
-
+        machine_name = machine_profile_json["info"]["name"]
         data = {"machine_id": machine_id}
         time_start = time.time()
         response = self.session.post(url, data=data, headers=self._build_headers())
@@ -539,6 +557,9 @@ class HTBClient:
 
     def search_machine(self, machine_namespace: argparse.Namespace) -> None:
         machine_name = machine_namespace.name
+        if machine_name[0].isdigit():
+            log.failure("The name of the box must be a string.")
+            sys.exit(-1)
 
         url = f"{self.base_url}/search/fetch?query={machine_name}"
         response = self.session.get(url, headers=self._build_headers())

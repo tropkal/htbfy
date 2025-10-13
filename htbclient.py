@@ -118,7 +118,6 @@ class HTBClient:
         time_left = initial_expires_at - time_now_utc
 
         # WHATS time_left ??
-        breakpoint()
         formatted_time_left = self._format_time(time_left)
 
         if self.check_time:

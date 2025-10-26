@@ -95,8 +95,6 @@ class HTBClient:
 
     def _format_time(self, date_obj: datetime) -> str:
 
-        # date.days
-        # AttributeError: 'str' object has no attribute 'days'
         days, seconds = date_obj.days, date_obj.seconds
         hours = days * 24 + seconds // 3600
         minutes = seconds % 3600 // 60
@@ -117,11 +115,9 @@ class HTBClient:
         time_now_utc = datetime.now(timezone.utc)
         time_left = initial_expires_at - time_now_utc
 
-        # WHATS time_left ??
-        formatted_time_left = self._format_time(time_left)
+        time_left_formatted = self._format_time(time_left)
 
         if self.check_time:
-            # get the new expires_at time after extending the box's time
             info_obj = self._get_active_machine()
             if info_obj is None:
                 log.failure("No active machine found.")
@@ -131,18 +127,18 @@ class HTBClient:
                     info_obj["expires_at"], date_format
                     ).replace(tzinfo=timezone.utc)
 
-            time_added = new_expires_at - initial_expires_at
+            time_added = new_expires_at - initial_expires_at # both are datetime objects
             new_expires_at = new_expires_at.strftime("%Y-%m-%d %H:%M:%S") # change the format
             time_added_formatted = self._format_time(time_added)
-            time_remaining = time_added_formatted + formatted_time_left
-            formatted_time_remaining = self._format_time(time_remaining)
+            time_remaining = time_added+ time_left
+            time_remaining_formatted = self._format_time(time_remaining)
 
             log.info(
-                    f"Expires at: {new_expires_at} UTC, time left before extending: {formatted_time}, {time_added} more hours added to the clock, total time remaining: {formatted_time_remaining}"
+                    f"Expires at: {new_expires_at} UTC, time left before extending: {time_left_formatted}, {time_added_formatted} more hours added to the clock, total time remaining: {time_remaining_formatted}"
                     )
         else:
             log.info(
-                    f"Currently active machine: {info_obj['name']}, OS: {machine_os}, IP: {info_obj['ip']}, time left: {formatted_time_left}."
+                    f"Currently active machine: {info_obj['name']}, OS: {machine_os}, IP: {info_obj['ip']}, time left: {time_left_formatted}."
                     )
 
     def get_active_machine(self) -> None:
@@ -435,7 +431,7 @@ class HTBClient:
         if (
                 response.status_code == 200
                 and response.json()["success"] == True
-                and "You pwned the " in response.json()["message"]
+                and response.json()["machine_pwned"] == True
                 ):
             log.success("Flag submitted successfully!")
         elif (
@@ -449,7 +445,7 @@ class HTBClient:
     def _discover(self, machine_id: int, owned: str) -> tuple[int | None, bool]:
         url = f"{self.base_url}/machines/{machine_id}/adventure"
         response = self.session.get(url, headers=self._build_headers())
-        if response.status_code == 200:  # there already exists a rating
+        if response.status_code == 200: # rating already submitted
             if owned == "user":
                 if (
                         response.json()["data"][0]["completed"] == True
@@ -460,8 +456,8 @@ class HTBClient:
                             )  # user rating
                     return existing_rating, True
                 elif (
-                        response.json()["data"][1]["completed"] == True
-                        and response.json()["data"][1]["flag_rating"] is None
+                        response.json()["data"][0]["completed"] == True
+                        and response.json()["data"][0]["flag_rating"] is None
                         ):
                     return None, True
                 else:

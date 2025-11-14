@@ -428,10 +428,10 @@ class HTBClient:
         data = {"flag": flag, "id": machine_id}
 
         response = self.session.post(url, json=data, headers=self._build_headers())
+        # breakpoint() # it works every time, but it also throws "Something bad happened when submitting the flag." from time to time
         if (
                 response.status_code == 200
                 and response.json()["success"] == True
-                and response.json()["machine_pwned"] == True
                 ):
             log.success("Flag submitted successfully!")
         elif (
@@ -539,6 +539,7 @@ class HTBClient:
             url = f"{self.base_url}/machine/{machine_id}/flag/rate"
             data = {"difficulty": rate, "machineId": machine_id, "type": owned}
             response = self.session.post(url, json=data, headers=self._build_headers())
+            # breakpoint() # this threw a key error on the log.success() line below, line 549
             if (
                     response.status_code == 200
                     and response.json()["message"] == "Flag rated."
